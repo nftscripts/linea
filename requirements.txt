@@ -1,0 +1,7 @@
+colorama==0.4.6
+eth_abi==4.0.0
+eth_typing==3.3.0
+hexbytes==0.3.1
+loguru==0.7.0
+tqdm==4.65.0
+web3==6.0.0
