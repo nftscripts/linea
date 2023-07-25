@@ -74,8 +74,8 @@ class BaseSwap:
         retries = 0
         while retries < 3:
             try:
-                tx.update({'maxFeePerGas': int(self.web3.eth.gas_price * 1.1)})
-                tx.update({'maxPriorityFeePerGas': self.web3.eth.gas_price})
+                tx.update({'maxFeePerGas': self.web3.eth.gas_price})
+                tx.update({'maxPriorityFeePerGas': self.web3.eth.max_priority_fee})
 
                 gasLimit = self.web3.eth.estimate_gas(tx)
                 tx.update({'gas': gasLimit})
