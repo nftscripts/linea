@@ -73,18 +73,31 @@ class BaseLiquidity:
         tx = await self.create_liquidity_tx(self.token, contract, amount_out, from_token_address, to_token_address,
                                             self.account_address, amount, self.web3)
 
-        tx.update({'maxFeePerGas': int(self.web3.eth.gas_price * 1.1)})
-        tx.update({'maxPriorityFeePerGas': self.web3.eth.gas_price})
+        retries = 0
+        while retries < 3:
+            try:
+                tx.update({'maxFeePerGas': int(self.web3.eth.max_priority_fee * 1.1)})
+                tx.update({'maxPriorityFeePerGas': self.web3.eth.max_priority_fee})
 
-        gasLimit = self.web3.eth.estimate_gas(tx)
-        tx.update({'gas': gasLimit})
+                gasLimit = self.web3.eth.estimate_gas(tx)
+                tx.update({'gas': gasLimit})
 
-        signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
-        raw_tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        tx_hash = self.web3.to_hex(raw_tx_hash)
-        logger.success(
-            f'Successfully added liquidity with {self.amount} ETH, {amount_out / 10 ** 18} {self.token2.upper()} | TX: https://lineascan.build/tx/{tx_hash}'
-        )
+                signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
+                raw_tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+                tx_hash = self.web3.to_hex(raw_tx_hash)
+                logger.success(
+                    f'Successfully added liquidity with {self.amount} ETH, {amount_out / 10 ** 18} {self.token2.upper()} | TX: https://lineascan.build/tx/{tx_hash}'
+                )
+                break
+            except Exception as ex:
+                if 'exceeds allowance' in str(ex):
+                    logger.error('Not enough money for transaction')
+                    return
+                logger.error(f'Something went wrong {ex}')
+                await sleep(random.randint(15, 20))
+                logger.debug('Trying one more time')
+                retries += 1
+                continue
 
     async def get_abi_name(self) -> None:
         raise NotImplementedError("Subclasses must implement get_abi_name()")
