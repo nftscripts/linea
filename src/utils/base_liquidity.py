@@ -76,8 +76,8 @@ class BaseLiquidity:
         retries = 0
         while retries < 3:
             try:
-                tx.update({'maxFeePerGas': int(self.web3.eth.max_priority_fee * 1.1)})
-                tx.update({'maxPriorityFeePerGas': self.web3.eth.max_priority_fee})
+                tx.update({'maxFeePerGas': int(self.web3.eth.gas_price * 1.1)})
+                tx.update({'maxPriorityFeePerGas': self.web3.eth.gas_price})
 
                 gasLimit = self.web3.eth.estimate_gas(tx)
                 tx.update({'gas': gasLimit})
