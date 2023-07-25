@@ -37,6 +37,7 @@ async def process_private_key(private_key: str, pbar: tqdm, thread_num: int, sem
             time_to_sleep = random.randint(MIN_PAUSE, MAX_PAUSE)
             logger.info(f'Thread {thread_num}: Sleeping {time_to_sleep} seconds...')
             await sleep(time_to_sleep)
+            await task
         await gather(*tasks)
     return all(task.done() for task in tasks)
 
