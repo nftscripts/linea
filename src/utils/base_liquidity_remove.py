@@ -63,18 +63,22 @@ class BaseLiquidityRemove:
         tx = await self.create_liquidity_remove_tx(self.web3, contract, tokens[self.from_token_pair.upper()],
                                                    amount, self.account_address)
 
-        tx.update({'maxFeePerGas': self.web3.eth.gas_price})
-        tx.update({'maxPriorityFeePerGas': self.web3.eth.max_priority_fee})
+        try:
+            tx.update({'maxFeePerGas': self.web3.eth.gas_price})
+            tx.update({'maxPriorityFeePerGas': self.web3.eth.max_priority_fee})
 
-        gasLimit = self.web3.eth.estimate_gas(tx)
-        tx.update({'gas': gasLimit})
+            gasLimit = self.web3.eth.estimate_gas(tx)
+            tx.update({'gas': gasLimit})
 
-        signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
-        raw_tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        tx_hash = self.web3.to_hex(raw_tx_hash)
-        logger.success(
-            f'Removed {"all" if self.remove_all else f"{self.removing_percentage * 100}%"} tokens from {pool_name} pool | TX: https://lineascan.build/tx/{tx_hash}'
-        )
+            signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
+            raw_tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            tx_hash = self.web3.to_hex(raw_tx_hash)
+            logger.success(
+                f'Removed {"all" if self.remove_all else f"{self.removing_percentage * 100}%"} tokens from {pool_name} pool | TX: https://lineascan.build/tx/{tx_hash}'
+            )
+
+        except Exception as ex:
+            logger.error(f'Something went wrong {ex}')
 
     async def get_abi_name(self) -> str:
         raise NotImplementedError("Subclasses must implement get_abi_name()")
